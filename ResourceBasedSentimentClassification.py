@@ -5,6 +5,8 @@ from nltk.tokenize import word_tokenize
 from sklearn.metrics.classification import accuracy_score
 from sklearn.metrics import f1_score
 import re
+import array as arr
+import numpy as np
 
 data = pd.read_csv("HindiSentiWordnet.txt", delimiter=' ')
 
@@ -20,8 +22,27 @@ for i in data.index:
     for word in words:
         words_dict[word] = (data[fields[0]][i], data[fields[2]][i], data[fields[3]][i])
 
+neg_list = []
+negatives_file = codecs.open("negatives.txt", "r", encoding='utf-8', errors='ignore').read()
+neg_list = negatives_file.split(',')
+neg_array = np.asarray(neg_list)
+a=0 #a=number of sentences found w/ desired negation
+
+# This function checks negation
+def negation_handling(text):
+    shabd = word_tokenize(text)
+    array1 = np.asarray(shabd)
+    lent = len(array1)
+    for x in range(lent):
+        if array1[x] == neg_array[0] and (array1[x-1] in words_dict): # 'na' not being matched
+            global a
+            a+=1
+            neg=-1
+            return neg
+
 # This function determines sentiment of text.
 def sentiment(text):
+    negation = negation_handling(text)
     words = word_tokenize(text)
     votes = []
     pos_polarity = 0
@@ -43,36 +64,46 @@ def sentiment(text):
     #calculating the no. of positive and negative words in total in a review to give class labels
     pos_votes = votes.count(1)
     neg_votes = votes.count(0)
+    if negation == None:
+        negation = 1
     if pos_votes > neg_votes:
-        return 1
+        return 1*negation
     elif neg_votes > pos_votes:
-        return 0
+        return -1*negation
     else:
         if pos_polarity < neg_polarity:
-            return 0
+            return -1*negation
         else:
-            return 1
+            return 1*negation
 
 
 pred_y = []
 actual_y = []
 # to calculate accuracy
+
 pos_reviews = codecs.open("pos_hindi.txt", "r", encoding='utf-8', errors='ignore').read()
 for line in pos_reviews.split('$'):
     data = line.strip('\n')
     if data:
         pred_y.append(sentiment(data))
         actual_y.append(1)
-#print(accuracy_score(actual_y, pred_y) * 100)
-print(len(actual_y))
+
 neg_reviews = codecs.open("neg_hindi.txt", "r", encoding='utf-8', errors='ignore').read()
 for line in neg_reviews.split('$'):
     data=line.strip('\n')
     if data:
         pred_y.append(sentiment(data))
-        actual_y.append(0)
-print(len(actual_y))
-print(accuracy_score(actual_y, pred_y) * 100)
+        actual_y.append(-1)
+
+neg_actual=actual_y.count(-1)
+neg_pred=pred_y.count(-1)
+pos_actual=actual_y.count(1)
+pos_pred=pred_y.count(1)
+
+print("\n",'positive:', "actual:", pos_actual, '  ', "predicted:", pos_pred)
+print('negative:', "actual:", neg_actual, '  ', "predicted:",neg_pred,"\n")
+
+print("Accuracy%:",accuracy_score(actual_y, pred_y) * 100, "\n")
 print('F-measure:  ',f1_score(actual_y,pred_y))
 
 # if __name__ == '__main__':
