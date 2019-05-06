@@ -54,10 +54,15 @@ UnigramTfFeatureGeneration.py: This module is used to generate Unigram+Tf Featur
 UnigramTfidfFeaturesetGeneration.py: This module is used to generate Unigram+Tfidf Featureset of reviews.
 
 pos_hindi.txt: This contains positive hindi reviews of dataset. Reviews are seperated by $.
+
 neg_hindi.txt: This contains negative Hindi reviews of dataset.
+
 pos_english.txt: This contains positive english reviews. These are used in Machine Translation based approach.
+
 neg_english.txt: This contains negative english reviews.
+
 negatives.txt: This file contains possible negative words like “नहीं”.
+
 dbn_outside: This is a directory Which contain deep belief network implementation.
 
 How To RUN:
